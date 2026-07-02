@@ -1,10 +1,10 @@
 #include <stdint.h>
 #include <math.h>
 
-// ==========================================
-// CORE REGISTERS (TM4C/MSP432E4 family style)
-// Direct register control (no DriverLib)
-// ==========================================
+
+// CORE REGISTERS (TM4C/MSP432E4 family style) //
+// Direct register control (no DriverLib) //
+
 
 // --- CLOCK GATING REGISTERS ---
 #define SYSCTL_RCGCGPIO_R  (*((volatile uint32_t *)0x400FE608))
@@ -40,9 +40,9 @@
 #define PWM0_1_GENA_R      (*((volatile uint32_t *)0x400280A0))
 #define PWM0_CC_R          (*((volatile uint32_t *)0x40028FC8))
 
-// ==========================================
-// CONFIG
-// ==========================================
+
+// CONFIG //
+
 #define MPU_ADDR 0x68
 #define PI 3.14159265f
 
@@ -70,16 +70,15 @@
 // Optional: only update if angle changes enough
 #define MIN_ANGLE_STEP     2
 
-// ==========================================
-// GLOBALS
-// ==========================================
+
+// GLOBALS //
+
 static float currentPitch = 0.0f;
 static float neutralPitch = 0.0f;
 static int   lastServoAngle = 90;
 
-// ==========================================
+
 // HELPERS
-// ==========================================
 static int clamp_i(int x, int lo, int hi) {
     if (x < lo) return lo;
     if (x > hi) return hi;
@@ -98,18 +97,16 @@ static void DelayMs(uint32_t ms) {
 static void LED_On(void)  { GPIO_PORTF_DATA_R |= LED_PIN_MASK; }
 static void LED_Off(void) { GPIO_PORTF_DATA_R &= ~LED_PIN_MASK; }
 
-// ==========================================
-// PROTOTYPES
-// ==========================================
+
+// PROTOTYPES //
 void InitPeripherals(void);
 void I2C_Write(uint8_t devAddr, uint8_t regAddr, uint8_t data);
 void I2C_ReadSequential(uint8_t devAddr, uint8_t regAddr, uint8_t *data, uint8_t count);
 void ReadIMU(void);
 void SetServoAngle(int angle);
 
-// ==========================================
-// MAIN
-// ==========================================
+
+// MAIN //
 int main(void) {
     InitPeripherals();
     LED_Off();
@@ -124,9 +121,9 @@ int main(void) {
     I2C_Write(MPU_ADDR, 0x6B, 0x00);
     DelayMs(50);
 
-    // ----------------------------
-    // CALIBRATION (hold upright + still)
-    // ----------------------------
+   
+    // CALIBRATION (hold upright + still) //
+
     SetServoAngle(90);
     LED_Off();
     DelayMs(2000);
@@ -145,9 +142,8 @@ int main(void) {
 
     lastServoAngle = 90;
 
-    // ----------------------------
-    // CONTROL LOOP (THRESHOLD + PROPORTIONAL)
-    // ----------------------------
+
+    // CONTROL LOOP (THRESHOLD + PROPORTIONAL) //
     while (1) {
 
         ReadIMU();
@@ -186,10 +182,8 @@ int main(void) {
     }
 }
 
-// ==========================================
-// IMU read (Accel Y/Z -> pitch)
-// pitch = atan2(ay, az)
-// ==========================================
+// IMU read (Accel Y/Z -> pitch) //
+// pitch = atan2(ay, az) //
 void ReadIMU(void) {
     uint8_t buffer[6];
     I2C_ReadSequential(MPU_ADDR, 0x3B, buffer, 6);
@@ -200,9 +194,8 @@ void ReadIMU(void) {
     currentPitch = (atan2f((float)ay, (float)az) * 180.0f) / PI;
 }
 
-// ==========================================
-// Servo (PWM0 Generator 1 on PF2)
-// ==========================================
+
+// Servo (PWM0 Generator 1 on PF2) //
 void SetServoAngle(int angle) {
     angle = clamp_i(angle, 0, 180);
 
@@ -213,9 +206,7 @@ void SetServoAngle(int angle) {
     PWM0_1_CMPA_R = (SERVO_PERIOD_TICKS - high_ticks - 1U);
 }
 
-// ==========================================
-// I2C low-level
-// ==========================================
+// I2C low-level // 
 void I2C_Write(uint8_t devAddr, uint8_t regAddr, uint8_t data) {
     I2C1_MSA_R = (devAddr << 1);
     I2C1_MDR_R = regAddr;
@@ -246,9 +237,7 @@ void I2C_ReadSequential(uint8_t devAddr, uint8_t regAddr, uint8_t *data, uint8_t
     }
 }
 
-// ==========================================
-// Peripheral init: PF2 PWM, PF3 GPIO out, PG0/PG1 I2C
-// ==========================================
+// Peripheral init: PF2 PWM, PF3 GPIO out, PG0/PG1 I2C //
 void InitPeripherals(void) {
     SYSCTL_RCGCGPIO_R |= 0x0060; // F + G
     SYSCTL_RCGCI2C_R  |= 0x0002; // I2C1
