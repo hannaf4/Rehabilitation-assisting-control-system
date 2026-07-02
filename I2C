@@ -1,0 +1,115 @@
+I2C
+
+Data is sent in at 8 bits at a time
+After each 8 bits--> Byte 
+
+9th clock pulse 
+
+reciever pulls SDA low -->  ACK
+or reciever leaves it high --> NACK
+
+
+ACK --> Recieved the byte I want more
+NACK --> Im done stop sending 
+
+
+Who sends ACK?
+IMU --> Master 
+master writes to the slave --> slave sends ACK
+when master reads from slave --> master sends ACK
+
+WHO MUST DECIDE WHEN TO STOP 
+
+
+Case 1: First Byte (Muti byte read)
+
+Start 
+Address + read
+
+You need:
+START 
+RUN 
+ACK
+No STOP
+
+Middle Byte:
+NO START 
+NO STOP
+JUST: 
+    RUN 
+    ACK
+"Thanks send the next one"
+
+Last Byte:
+NACK
+STOP
+"Master does not want to reply to marwan" 
+"Slave has no mroe work to do" 
+
+
+
+void I2C_ReadSequential(uint8_t devAddr, uint8_t regAddr, uint8_t *data, uint8_t count) {
+    I2C1_MSA_R = (devAddr << 1); // Address shifted left 1 bit (Write mode)
+    I2C1_MDR_R = regAddr;        // Tell sensor the starting register we want to read from
+    I2C1_MCS_R = 0x03;           // START + RUN
+    while (I2C1_MCS_R & 0x01);
+    
+    I2C1_MSA_R = (devAddr << 1) | 0x01; // Address shifted left 1 bit + LSB=1 (Switches line to Read Mode)
+       I2C1_MSA_R = (devAddr << 1) | 0x01; // Address shifted left 1 bit + LSB=1 (Switches line to Read Mode)
+    
+    for(uint8_t i = 0; i < count; i++) {
+        // I2C requires different STOP and ACK combinations depending on if it's the 1st byte, middle byte, or last byte
+        if(i == 0 && count == 1) I2C1_MCS_R = 0x07; // Only 1 byte total: START + RUN + STOP
+        else if(i == 0)          I2C1_MCS_R = 0x0B; // First Byte: START + RUN + ACK
+        else if(i == count - 1)  I2C1_MCS_R = 0x05; // Last Byte: RUN + STOP
+        else                     I2C1_MCS_R = 0x09; // Middle Bytes: RUN + ACK
+        
+        while (I2C1_MCS_R & 0x01); // Wait for byte to physically arrive over wire
+        data[i] = I2C1_MDR_R;      // Save byte to our array
+    }
+}
+
+
+For your 6 byte MPU read, show me what your bus looks like:
+
+START
+Write
+Put to register Address
+Read what's in the registers
+
+START + RUN + ACK - Byte 1
+
+RUN + ACK - Byte 2
+
+RUN + ACK - Byte 3
+
+RUN + ACK - Byte 4
+
+RUN + ACK - Byte 5
+
+STOP + NACK
+
+
+----------------------
+Start 
+Address + read
+
+You need:
+START 
+RUN 
+ACK
+No STOP
+
+Middle Byte:
+NO START 
+NO STOP
+JUST: 
+    RUN 
+    ACK
+"Thanks send the next one"
+
+Last Byte:
+NACK
+STOP
+"Master does not want to reply to marwan" 
+"Slave has no mroe work to do" 

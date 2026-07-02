@@ -1,0 +1,39 @@
+  DelayMs(2000); // 2-second delay. User must hold sensor upright here!
+    
+    float sum = 0.0f;
+    for(int i=0; i<10; i++) { ReadIMU(); DelayMs(10); } // Warm up sensor: discard first 10 readings
+    for(int i=0; i<50; i++) {                           // Take 50 valid readings over half a second
+        ReadIMU(); 
+        sum += currentPitch; 
+        DelayMs(10); 
+
+
+
+for(int i=0; i<10; i++) { ReadIMU(); DelayMs(10); } // Warm up sensor: discard first 10 readings
+ReadIMU();
+DelayMs(10); 
+
+
+    for(int i=0; i<50; i++) {   
+        
+        // Take 50 valid readings over half a second
+
+Takes in 3 samples --> error is anything over 0.2 degggs 
+
+
+--> error tolerance 
+if you 4 degs 
+        0.8 deg  --> Smaple 1
+        10 ms delay 
+        -0.5 degg --> sample 2
+        10 ms delay
+        1.1 deg 
+        --> is ur posture good?
+        0 degs 
+
+    0.8-0.5+1.1 = 1.4 
+
+
+    IMU will never be mounted perfectly flat 
+
+    

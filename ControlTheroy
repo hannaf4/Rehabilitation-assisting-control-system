@@ -1,0 +1,44 @@
+correction = (Kp * error) + (Ki * integralError);
+targetAngle = 90 + correction; 
+
+
+error = 10degs --> 10 degs forward
+Kp = 2 
+
+correction = 2.0 * 10 = 20
+targetAngle = 90 + 20 = 110°
+
+correction = (10 * 10
+--> 
+20 degs response servo motror 10 degs error
+
+for every 1 deg of slouch the servo moves 2 degs 
+Kp = 10 deg error --> 
+
+Kp = 0.2 
+10 deg error --> 2 deg 
+Servo barley moves user would not feel a corrrectipo 
+Kp = 2 
+
+50 Hz loops
+Filtered signal
+Slow system 
+
+integralError += error * dt;
+integralError = 10 deg * 10 sec = 100
+Ki * integerror = 1 * 100 = 100 deg
+
+
+Kp : Ki 
+2 : 0.05
+40 : 1
+
+Loop run at 50 Hz
+Servo 200 ms mechanical delay 
+human posture changes slowly 
+accelerometer noise filtered 
+smooth 
+predicatible 
+
+
+
